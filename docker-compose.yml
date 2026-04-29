@@ -4,7 +4,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - chroma_data:/chroma/chroma
+      - ./data/chroma:/chroma/chroma
     environment:
       - IS_PERSISTENT=TRUE
     healthcheck:
@@ -44,5 +44,3 @@ services:
       retries: 3
       start_period: 30s
 
-volumes:
-  chroma_data:
