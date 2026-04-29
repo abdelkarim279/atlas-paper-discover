@@ -1,0 +1,48 @@
+services:
+  chromadb:
+    image: chromadb/chroma:0.5.11
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  app:
+    build: .
+    ports:
+      - "7860:7860"
+    volumes:
+      # atlas.json (pre-built by scripts/build_atlas.py) — read-only
+      - ./data:/app/data:ro
+    environment:
+      # Within the Docker network, ChromaDB is reachable at chromadb:8000
+      # (the host-side 8001 mapping is only for direct host access)
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - ATLAS_PATH=data/atlas.json
+      - EMBED_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      # Frontend is served by FastAPI itself (same origin), so CORS is only
+      # needed if you hit the API from outside (e.g. curl, Postman).
+      - CORS_ORIGINS=["http://localhost:7860"]
+      - LOG_LEVEL=INFO
+    # Override the default CMD (start.sh) — ChromaDB runs as a sidecar here
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "7860"]
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  chroma_data:
