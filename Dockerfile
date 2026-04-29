@@ -42,9 +42,8 @@ RUN chmod +x start.sh
 # Copy built frontend from stage 1
 COPY --from=frontend-builder /build/dist frontend/dist/
 
-# data/ is intentionally NOT copied here — atlas.json + chroma/ are either
-# volume-mounted (docker compose) or committed to the HF Space repo.
-RUN mkdir -p data
+RUN mkdir -p data/chroma
+COPY data/atlas.json data/atlas.json
 
 EXPOSE 7860
 
