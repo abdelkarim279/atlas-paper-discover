@@ -78,5 +78,5 @@ api/          FastAPI app — /api/points, /api/search, /api/document/{id}
 ml/           Embedder, UMAP reducer, ChromaDB client
 scripts/      build_atlas.py — offline ingestion pipeline
 frontend/     Vite + React + deck.gl visualization
-data/         atlas.json + ChromaDB store (gitignored, built locally)
+data/         atlas.json + ChromaDB store
 ```
